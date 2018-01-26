@@ -7,10 +7,18 @@ import signal
 import sys
 import os
 import select
+import argparse
+
+# Start clangd, return a Popen object.
 
 
-def start_clangd():
-    return subprocess.Popen('./bin/clangd -run-synchronously -compile-commands-dir=/home/emaisin/build/binutils-gdb-noexpat-clang', shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+def start_clangd(compile_commands_dir):
+    cmd = 'clangd -run-synchronously'
+
+    if compile_commands_dir:
+        cmd += ' -compile-commands-dir=' + compile_commands_dir
+
+    return subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
 
 class ReceiveThread(threading.Thread):
@@ -203,7 +211,12 @@ class GotoDefinition(Base):
 
 
 def main():
-    clangd = start_clangd()
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('--compile-commands-dir',
+                           help='directory containing the compile_commands.json')
+    args = argparser.parse_args()
+
+    clangd = start_clangd(args.compile_commands_dir)
     json_rpc = JsonRpc(clangd.stdin, clangd.stdout)
 
     p = json_rpc.request(Initialize())
