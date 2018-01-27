@@ -12,8 +12,11 @@ import argparse
 # Start clangd, return a Popen object.
 
 
-def start_clangd(compile_commands_dir):
-    cmd = 'clangd -run-synchronously'
+def start_clangd(clangd, compile_commands_dir):
+    if not clangd:
+        clangd = 'clangd'
+
+    cmd = '{} -run-synchronously'.format(clangd)
 
     if compile_commands_dir:
         cmd += ' -compile-commands-dir=' + compile_commands_dir
@@ -214,9 +217,11 @@ def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument('--compile-commands-dir',
                            help='directory containing the compile_commands.json')
+    argparser.add_argument('--clangd',
+                           help='clangd executable')
     args = argparser.parse_args()
 
-    clangd = start_clangd(args.compile_commands_dir)
+    clangd = start_clangd(args.clangd, args.compile_commands_dir)
     json_rpc = JsonRpc(clangd.stdin, clangd.stdout)
 
     p = json_rpc.request(Initialize())
