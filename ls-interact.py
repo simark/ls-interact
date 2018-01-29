@@ -9,10 +9,10 @@ import os
 import select
 import argparse
 
-# Start clangd, return a Popen object.
-
 
 def start_clangd(clangd, compile_commands_dir):
+    ''' Start clangd, return a Popen object. '''
+
     if not clangd:
         clangd = 'clangd'
 
@@ -22,43 +22,6 @@ def start_clangd(clangd, compile_commands_dir):
         cmd += ' -compile-commands-dir=' + compile_commands_dir
 
     return subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-
-
-class ReceiveThread(threading.Thread):
-    def __init__(self, inp, recv_queue):
-        super().__init__()
-        self._input = inp
-        self._recv_queue = recv_queue
-
-    def run(self):
-        buf = b""
-
-        while True:
-            buf += self._input.read(1)
-
-            idx = buf.find(b'\r\n\r\n')
-            if idx >= 0:
-                header = buf[:idx + 4]
-                buf = buf[idx + 4:]
-                content_length = -1
-
-                headers = header.split(b'\r\n\r\n')
-                for h in headers:
-                    if h.startswith(b'Content-Length: '):
-                        content_length = int(h[len(b'Content-Length: '):])
-
-                to_read = max(content_length - len(buf), 0)
-
-                buf += self._input.read(to_read)
-
-                assert len(buf) >= content_length
-
-                json_data = buf[:content_length]
-                buf = buf[content_length:]
-                json_data = json_data.decode()
-                json_data = json.loads(json_data)
-
-                self._recv_queue.put(json_data)
 
 
 class JsonRpc:
@@ -85,9 +48,7 @@ class JsonRpc:
     def __init__(self, output, inp):
         self._output = output
         self._next_id = 123
-        self._recv_queue = queue.Queue()
-        self._recv_thread = ReceiveThread(inp, self._recv_queue)
-        self._recv_thread.start()
+        self._input = inp
 
     def request(self, req):
         method_name = req.get_method_name()
@@ -128,9 +89,33 @@ class JsonRpc:
         self._output.write(b)
         self._output.flush()
 
+    def pull_one_message(self):
+        buf = b""
+
+        while True:
+            buf += self._input.read(1)
+
+            if buf.endswith(b'\r\n\r\n'):
+                content_length = -1
+
+                headers = buf.split(b'\r\n')
+                for h in headers:
+                    if h.startswith(b'Content-Length: '):
+                        content_length = int(h[len(b'Content-Length: '):])
+
+                assert content_length > 0
+
+                buf = self._input.read(content_length)
+
+                assert len(buf) == content_length
+
+                json_data = json.loads(buf.decode())
+
+                return json_data
+
     def wait_for(self, pending):
         while True:
-            json_data = self._recv_queue.get()
+            json_data = self.pull_one_message()
             if pending.matches(json_data):
                 return pending.extract(json_data)
 
@@ -213,6 +198,19 @@ class GotoDefinition(Base):
         return obj
 
 
+class DidChangeConfiguration(Base):
+
+    def __init__(self, new_compile_commands_dir):
+        super().__init__('workspace/didChangeConfiguration')
+        self._new_compile_commands_dir = new_compile_commands_dir
+
+    def get_params(self):
+        obj = {}
+        obj['settings'] = {}
+        obj['settings']['compilationDatabasePath'] = self._new_compile_commands_dir
+        return obj
+
+
 def main():
     argparser = argparse.ArgumentParser()
     argparser.add_argument('--compile-commands-dir',
@@ -229,7 +227,7 @@ def main():
 
     # sys.stdin.readline()
 
-    path = '/home/emaisin/src/binutils-gdb/gdb/osdata.c'
+    path = '/home/simark/src/binutils-gdb/gdb/osdata.c'
 
     p = json_rpc.notify(DidOpenTextDocument(path))
     r = json_rpc.wait_for(JsonRpc.JsonRpcPendingMethod(
@@ -243,10 +241,5 @@ def main():
 
     json_rpc.notify(Exit())
 
-    os._exit(0)
 
-
-try:
-    main()
-except KeyboardInterrupt:
-    os._exit(1)
+main()
