@@ -10,13 +10,16 @@ import select
 import argparse
 
 
-def start_clangd(clangd, compile_commands_dir):
+def start_clangd(clangd, compile_commands_dir, run_synchronously=True):
     ''' Start clangd, return a Popen object. '''
 
     if not clangd:
         clangd = 'clangd'
+    
+    cmd = '{}'.format(clangd)
 
-    cmd = '{} -run-synchronously'.format(clangd)
+    if run_synchronously:
+        cmd += ' -run-synchronously'
 
     if compile_commands_dir:
         cmd += ' -compile-commands-dir=' + compile_commands_dir
@@ -219,7 +222,7 @@ def main():
                            help='clangd executable')
     args = argparser.parse_args()
 
-    clangd = start_clangd(args.clangd, args.compile_commands_dir)
+    clangd = start_clangd(args.clangd, args.compile_commands_dir, run_synchronously=False)
     json_rpc = JsonRpc(clangd.stdin, clangd.stdout)
 
     p = json_rpc.request(Initialize())
