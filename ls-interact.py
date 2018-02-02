@@ -228,21 +228,49 @@ def main():
     p = json_rpc.request(Initialize())
     r = json_rpc.wait_for(p)
 
-    # sys.stdin.readline()
+    sys.stdin.readline()
 
-    path = '/home/simark/src/binutils-gdb/gdb/osdata.c'
+    paths = [
+              '/home/emaisin/src/binutils-gdb/gdb/breakpoint.c',
+              '/home/emaisin/src/binutils-gdb/gdb/infrun.c',
+              '/home/emaisin/src/binutils-gdb/bfd/cache.c',
+    #         '/home/emaisin/src/binutils-gdb/gdb/addrmap.c',
+    #         '/home/emaisin/src/binutils-gdb/gdb/ada-lang.c',
+    #         '/home/emaisin/src/binutils-gdb/gdb/ada-tasks.c',
+    #         '/home/emaisin/src/binutils-gdb/gdb/c-lang.c',
+    #         '/home/emaisin/src/binutils-gdb/gdb/amd64-tdep.c'
+             ]
+    #path = '/home/emaisin/build/llvm/ls-interact/foo.c'
 
-    p = json_rpc.notify(DidOpenTextDocument(path))
-    r = json_rpc.wait_for(JsonRpc.JsonRpcPendingMethod(
-        'textDocument/publishDiagnostics'))
+    for p in paths:
+        json_rpc.notify(DidOpenTextDocument(p))
+    #json_rpc.wait_for(JsonRpc.JsonRpcPendingMethod('textDocument/publishDiagnostics'))
+    
+    for p in paths:
+        json_rpc.wait_for(JsonRpc.JsonRpcPendingMethod('textDocument/publishDiagnostics'))
 
-    p = json_rpc.request(GotoDefinition(path, 178, 15))
-    r = json_rpc.wait_for(p)
+    #sys.stdin.readline()
+    
+    json_rpc.notify(DidChangeConfiguration('/home/emaisin/build/binutils-gdb-noexpat-clang'))
+    
+    #json_rpc.notify(DidOpenTextDocument(path_remote))
+    for p in paths:
+        json_rpc.wait_for(JsonRpc.JsonRpcPendingMethod('textDocument/publishDiagnostics'))
+    #json_rpc.wait_for(JsonRpc.JsonRpcPendingMethod('textDocument/publishDiagnostics'))
+    #sys.stdin.readline()
+    #p = json_rpc.request(GotoDefinition(path_remote, 13613, 26))
+    #r = json_rpc.wait_for(p)
+    
+    #sys.stdin.readline()
 
+    #p = json_rpc.request(GotoDefinition(path, 10, 15))
+    #r = json_rpc.wait_for(p)
+   
     p = json_rpc.request(Shutdown())
     r = json_rpc.wait_for(p)
 
     json_rpc.notify(Exit())
 
 
-main()
+if __name__ == '__main__':
+    main()
