@@ -15,7 +15,7 @@ def start_clangd(clangd, compile_commands_dir, run_synchronously=True):
 
     if not clangd:
         clangd = 'clangd'
-    
+
     cmd = '{}'.format(clangd)
 
     if run_synchronously:
@@ -181,10 +181,43 @@ class DidOpenTextDocument(Base):
         return obj
 
 
+class DidCloseTextDocument(Base):
+
+    def __init__(self, path):
+        super().__init__('textDocument/didClose')
+        self._path = path
+
+    def get_params(self):
+        obj = {}
+        obj['textDocument'] = {}
+        obj['textDocument']['uri'] = 'file://' + self._path
+        return obj
+
+
 class GotoDefinition(Base):
 
     def __init__(self, path, line, col):
         super().__init__('textDocument/definition')
+        self._path = path
+        self._line = line
+        self._col = col
+
+    def get_params(self):
+        obj = {}
+
+        obj['textDocument'] = {}
+        obj['textDocument']['uri'] = 'file://' + self._path
+        obj['position'] = {}
+        obj['position']['line'] = self._line - 1
+        obj['position']['character'] = self._col - 1
+
+        return obj
+
+
+class Hover(Base):
+
+    def __init__(self, path, line, col):
+        super().__init__('textDocument/hover')
         self._path = path
         self._line = line
         self._col = col
@@ -214,7 +247,7 @@ class DidChangeConfiguration(Base):
         return obj
 
 
-def run(callback):
+def run(callback, run_synchronously=True):
     argparser = argparse.ArgumentParser()
     argparser.add_argument('--compile-commands-dir',
                            help='directory containing the compile_commands.json')
@@ -222,14 +255,14 @@ def run(callback):
                            help='clangd executable')
     args = argparser.parse_args()
 
-    clangd = start_clangd(args.clangd, args.compile_commands_dir, run_synchronously=False)
+    clangd = start_clangd(args.clangd, args.compile_commands_dir, run_synchronously)
     json_rpc = JsonRpc(clangd.stdin, clangd.stdout)
 
     p = json_rpc.request(Initialize())
     r = json_rpc.wait_for(p)
 
     callback(json_rpc)
-    
+
     p = json_rpc.request(Shutdown())
     r = json_rpc.wait_for(p)
 
