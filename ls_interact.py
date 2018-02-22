@@ -10,19 +10,10 @@ import select
 import argparse
 
 
-def start_clangd(clangd, compile_commands_dir, run_synchronously=True):
-    ''' Start clangd, return a Popen object. '''
+def start_langserv(langserv):
+    ''' Start the language server, return a Popen object. '''
 
-    if not clangd:
-        clangd = 'clangd'
-
-    cmd = '{}'.format(clangd)
-
-    if run_synchronously:
-        cmd += ' -run-synchronously'
-
-    if compile_commands_dir:
-        cmd += ' -compile-commands-dir=' + compile_commands_dir
+    cmd = '{}'.format(langserv)
 
     return subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
@@ -255,19 +246,16 @@ class DidChangeConfiguration(Base):
         return obj
 
 
-def run(callback, run_synchronously=True):
+def run(callback):
     argparser = argparse.ArgumentParser()
-    argparser.add_argument('--compile-commands-dir',
-                           help='directory containing the compile_commands.json')
-    argparser.add_argument('--clangd',
-                           help='clangd executable')
+    argparser.add_argument('server',
+                           help='server executable (may contain additional args)')
     argparser.add_argument('--log', action='store_true',
                            help='print communication with the server')
     args = argparser.parse_args()
 
-    clangd = start_clangd(
-        args.clangd, args.compile_commands_dir, run_synchronously)
-    json_rpc = JsonRpc(clangd.stdin, clangd.stdout, args.log)
+    server = start_langserv(args.server)
+    json_rpc = JsonRpc(server.stdin, server.stdout, args.log)
 
     p = json_rpc.request(Initialize())
     r = json_rpc.wait_for(p)
