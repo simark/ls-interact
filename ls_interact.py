@@ -48,10 +48,11 @@ class JsonRpc:
         def extract(self, json_data):
             return json_data['params']
 
-    def __init__(self, output, inp):
+    def __init__(self, output, inp, log):
         self._output = output
         self._next_id = 123
         self._input = inp
+        self._log = log
 
     def request(self, req):
         method_name = req.get_method_name()
@@ -70,6 +71,8 @@ class JsonRpc:
         header = 'Content-Length: {}\r\n\r\n'.format(len(b)).encode()
 
         self._output.write(header)
+        if self._log:
+            print('client --> server: {}'.format(b))
         self._output.write(b)
         self._output.flush()
 
@@ -89,6 +92,8 @@ class JsonRpc:
         header = 'Content-Length: {}\r\n\r\n'.format(len(b)).encode()
 
         self._output.write(header)
+        if self._log:
+            print('client --> server: {}'.format(b))
         self._output.write(b)
         self._output.flush()
 
@@ -111,6 +116,9 @@ class JsonRpc:
                 buf = self._input.read(content_length)
 
                 assert len(buf) == content_length
+
+                if self._log:
+                    print('server --> client: {}'.format(buf))
 
                 json_data = json.loads(buf.decode())
 
@@ -253,10 +261,13 @@ def run(callback, run_synchronously=True):
                            help='directory containing the compile_commands.json')
     argparser.add_argument('--clangd',
                            help='clangd executable')
+    argparser.add_argument('--log', action='store_true',
+                           help='print communication with the server')
     args = argparser.parse_args()
 
-    clangd = start_clangd(args.clangd, args.compile_commands_dir, run_synchronously)
-    json_rpc = JsonRpc(clangd.stdin, clangd.stdout)
+    clangd = start_clangd(
+        args.clangd, args.compile_commands_dir, run_synchronously)
+    json_rpc = JsonRpc(clangd.stdin, clangd.stdout, args.log)
 
     p = json_rpc.request(Initialize())
     r = json_rpc.wait_for(p)
