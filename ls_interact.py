@@ -144,6 +144,15 @@ class Initialize(Base):
         return {}
 
 
+class Initialized(Base):
+
+    def __init__(self):
+        super().__init__('initialized')
+
+    def get_params(self):
+        return {}
+
+
 class Shutdown(Base):
 
     def __init__(self):
@@ -217,6 +226,31 @@ class GotoDefinition(Base):
         return obj
 
 
+class CodeLens(Base):
+
+    def __init__(self, path):
+        super().__init__('textDocument/codeLens')
+        self._path = path
+
+    def get_params(self):
+        obj = {}
+
+        obj['textDocument'] = {}
+        obj['textDocument']['uri'] = 'file://' + self._path
+
+        return obj
+
+
+class CodeLensResolve(Base):
+
+    def __init__(self, lens):
+        super().__init__('codeLens/resolve')
+        self._lens = lens
+
+    def get_params(self):
+        return self._lens
+
+
 class Hover(Base):
 
     def __init__(self, path, line, col):
@@ -263,6 +297,8 @@ def run(callback):
 
     p = json_rpc.request(Initialize())
     r = json_rpc.wait_for(p)
+
+    json_rpc.notify(Initialized())
 
     callback(json_rpc)
 
