@@ -9,12 +9,12 @@ import os
 import select
 import argparse
 
+from colorama import Fore, Back, Style
 
 def start_langserv(langserv):
     ''' Start the language server, return a Popen object. '''
 
     cmd = '{}'.format(langserv)
-
     return subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
 
@@ -63,7 +63,7 @@ class JsonRpc:
 
         self._output.write(header)
         if self._log:
-            print('client --> server: {}'.format(b))
+            print('{}{}client --> server{}: {}'.format(Back.GREEN, Fore.BLACK, Style.RESET_ALL, b))
         self._output.write(b)
         self._output.flush()
 
@@ -84,7 +84,7 @@ class JsonRpc:
 
         self._output.write(header)
         if self._log:
-            print('client --> server: {}'.format(b))
+            print('{}{}client --> server{}: {}'.format(Back.GREEN, Fore.BLACK, Style.RESET_ALL, b))
         self._output.write(b)
         self._output.flush()
 
@@ -109,7 +109,7 @@ class JsonRpc:
                 assert len(buf) == content_length
 
                 if self._log:
-                    print('server --> client: {}'.format(buf))
+                    print('{}{}server --> client{}: {}'.format(Back.BLUE, Fore.BLACK, Style.RESET_ALL, buf))
 
                 json_data = json.loads(buf.decode())
 
