@@ -11,6 +11,7 @@ import argparse
 
 from colorama import Fore, Back, Style
 
+
 def start_langserv(langserv):
     ''' Start the language server, return a Popen object. '''
 
@@ -63,7 +64,8 @@ class JsonRpc:
 
         self._output.write(header)
         if self._log:
-            print('{}{}client --> server{}: {}'.format(Back.GREEN, Fore.BLACK, Style.RESET_ALL, b))
+            print('{}{}client --> server{}: {}'.format(Back.GREEN,
+                                                       Fore.BLACK, Style.RESET_ALL, b))
         self._output.write(b)
         self._output.flush()
 
@@ -84,7 +86,8 @@ class JsonRpc:
 
         self._output.write(header)
         if self._log:
-            print('{}{}client --> server{}: {}'.format(Back.GREEN, Fore.BLACK, Style.RESET_ALL, b))
+            print('{}{}client --> server{}: {}'.format(Back.GREEN,
+                                                       Fore.BLACK, Style.RESET_ALL, b))
         self._output.write(b)
         self._output.flush()
 
@@ -109,7 +112,8 @@ class JsonRpc:
                 assert len(buf) == content_length
 
                 if self._log:
-                    print('{}{}server --> client{}: {}'.format(Back.BLUE, Fore.BLACK, Style.RESET_ALL, buf))
+                    print('{}{}server --> client{}: {}'.format(Back.BLUE,
+                                                               Fore.BLACK, Style.RESET_ALL, buf))
 
                 json_data = json.loads(buf.decode())
 
