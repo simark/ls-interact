@@ -21,6 +21,7 @@ def start_langserv(langserv):
     cmd = '{}'.format(langserv)
     return subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
+
 def print_log(json_bytes, sender):
     assert type(json_bytes) == bytes
     assert sender == 'client' or sender == 'server'
@@ -155,11 +156,12 @@ class Base:
 
 class Initialize(Base):
 
-    def __init__(self):
+    def __init__(self, params):
         super().__init__('initialize')
+        self._params = params
 
     def get_params(self):
-        return {}
+        return self._params
 
 
 class Initialized(Base):
@@ -302,7 +304,7 @@ class DidChangeConfiguration(Base):
         return obj
 
 
-def run(callback):
+def run(callback, initialize_params={}):
     argparser = argparse.ArgumentParser()
     argparser.add_argument('server',
                            help='server executable (may contain additional args)')
@@ -313,7 +315,7 @@ def run(callback):
     server = start_langserv(args.server)
     json_rpc = JsonRpc(server.stdin, server.stdout, args.log)
 
-    p = json_rpc.request(Initialize())
+    p = json_rpc.request(Initialize(initialize_params))
     r = json_rpc.wait_for(p)
 
     json_rpc.notify(Initialized())
