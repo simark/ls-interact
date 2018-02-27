@@ -1,0 +1,4 @@
+static inline void
+bob()
+{
+}
