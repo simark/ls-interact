@@ -10,6 +10,9 @@ import select
 import argparse
 
 from colorama import Fore, Back, Style
+from pygments import highlight
+from pygments.lexers import JsonLexer
+from pygments.formatters import TerminalFormatter
 
 
 def start_langserv(langserv):
@@ -17,6 +20,22 @@ def start_langserv(langserv):
 
     cmd = '{}'.format(langserv)
     return subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+
+def print_log(json_bytes, sender):
+    assert type(json_bytes) == bytes
+    assert sender == 'client' or sender == 'server'
+
+    j = json_bytes.decode('utf-8')
+
+    if sender == 'client':
+        prefix = 'client --> server'
+        back = Back.GREEN
+    else:
+        prefix = 'server --> client'
+        back = Back.BLUE
+
+    j = highlight(j, JsonLexer(), TerminalFormatter())
+    print('{}{}{}{}: {}'.format(back, Fore.BLACK, prefix, Style.RESET_ALL, j))
 
 
 class JsonRpc:
@@ -64,8 +83,8 @@ class JsonRpc:
 
         self._output.write(header)
         if self._log:
-            print('{}{}client --> server{}: {}'.format(Back.GREEN,
-                                                       Fore.BLACK, Style.RESET_ALL, b))
+            print_log(b, 'client')
+
         self._output.write(b)
         self._output.flush()
 
@@ -86,8 +105,8 @@ class JsonRpc:
 
         self._output.write(header)
         if self._log:
-            print('{}{}client --> server{}: {}'.format(Back.GREEN,
-                                                       Fore.BLACK, Style.RESET_ALL, b))
+            print_log(b, 'client')
+
         self._output.write(b)
         self._output.flush()
 
@@ -112,8 +131,7 @@ class JsonRpc:
                 assert len(buf) == content_length
 
                 if self._log:
-                    print('{}{}server --> client{}: {}'.format(Back.BLUE,
-                                                               Fore.BLACK, Style.RESET_ALL, buf))
+                    print_log(buf, 'server')
 
                 json_data = json.loads(buf.decode())
 
