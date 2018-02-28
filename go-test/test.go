@@ -32,4 +32,7 @@ func main() {
 
     res = plusPlus(1, 2, 3)
     fmt.Println("1+2+3 =", res)
+
+    res = Times(5, 6, 7)
+    fmt.Println(res)
 }
