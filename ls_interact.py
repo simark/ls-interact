@@ -22,11 +22,14 @@ def start_langserv(langserv):
     return subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
 
-def print_log(json_bytes, sender):
+def print_log(json_bytes, sender, log_pretty):
     assert type(json_bytes) == bytes
     assert sender == 'client' or sender == 'server'
 
     j = json_bytes.decode('utf-8')
+
+    if log_pretty:
+        j = json.dumps(json.loads(j), indent=4)
 
     if sender == 'client':
         prefix = 'client --> server'
@@ -60,11 +63,12 @@ class JsonRpc:
         def extract(self, json_data):
             return json_data['params']
 
-    def __init__(self, output, inp, log):
+    def __init__(self, output, inp, log, log_pretty):
         self._output = output
         self._next_id = 123
         self._input = inp
         self._log = log
+        self._log_pretty = log_pretty
 
     def request(self, req):
         method_name = req.get_method_name()
@@ -84,7 +88,7 @@ class JsonRpc:
 
         self._output.write(header)
         if self._log:
-            print_log(b, 'client')
+            print_log(b, 'client', self._log_pretty)
 
         self._output.write(b)
         self._output.flush()
@@ -106,7 +110,7 @@ class JsonRpc:
 
         self._output.write(header)
         if self._log:
-            print_log(b, 'client')
+            print_log(b, 'client', self._log_pretty)
 
         self._output.write(b)
         self._output.flush()
@@ -132,7 +136,7 @@ class JsonRpc:
                 assert len(buf) == content_length
 
                 if self._log:
-                    print_log(buf, 'server')
+                    print_log(buf, 'server', self._log_pretty)
 
                 json_data = json.loads(buf.decode())
 
@@ -310,10 +314,12 @@ def run(callback, initialize_params={}):
                            help='server executable (may contain additional args)')
     argparser.add_argument('--log', action='store_true',
                            help='print communication with the server')
+    argparser.add_argument('--log-pretty', action='store_true',
+                           help='when --log is enabled, pretty-print the json')
     args = argparser.parse_args()
 
     server = start_langserv(args.server)
-    json_rpc = JsonRpc(server.stdin, server.stdout, args.log)
+    json_rpc = JsonRpc(server.stdin, server.stdout, args.log, args.log_pretty)
 
     p = json_rpc.request(Initialize(initialize_params))
     r = json_rpc.wait_for(p)
