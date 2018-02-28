@@ -35,4 +35,7 @@ func main() {
 
     res = Times(5, 6, 7)
     fmt.Println(res)
+
+    // We are missing the godoc import, we should get a code action to add the import
+    fmt.Println(godoc.ErrFileIndexVersion)
 }

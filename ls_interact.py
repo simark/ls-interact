@@ -149,6 +149,43 @@ class JsonRpc:
                 return pending.extract(json_data)
 
 
+class Range:
+
+    def __init__(self, start_line, start_col, end_line, end_col):
+        self._sl = start_line
+        self._sc = start_col
+        self._el = end_line
+        self._ec = end_col
+
+    def to_lsp(self):
+        return {
+            'start': {
+                'line': self._sl - 1,
+                'character': self._sc - 1,
+            },
+            'end': {
+                'line': self._el - 1,
+                'character': self._ec - 1,
+            },
+        }
+
+    @property
+    def lsp_start_line(self):
+        return self._sl - 1
+
+    @property
+    def lsp_start_col(self):
+        return self._sc - 1
+
+    @property
+    def lsp_end_line(self):
+        return self._el - 1
+
+    @property
+    def lsp_end_col(self):
+        return self._ec - 1
+
+
 class Base:
 
     def __init__(self, method_name):
@@ -273,6 +310,27 @@ class CodeLensResolve(Base):
 
     def get_params(self):
         return self._lens
+
+
+class CodeAction(Base):
+
+    def __init__(self, path, range_, diags):
+        super().__init__('textDocument/codeAction')
+        self._path = path
+        self._range = range_
+        self._diags = diags
+
+    def get_params(self):
+        obj = {}
+
+        obj['textDocument'] = {}
+        obj['textDocument']['uri'] = 'file://' + self._path
+        obj['range'] = self._range.to_lsp()
+        obj['context'] = {
+            'diagnostics': self._diags,
+        }
+
+        return obj
 
 
 class Hover(Base):

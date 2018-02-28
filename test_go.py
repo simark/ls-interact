@@ -23,6 +23,12 @@ def interact(json_rpc):
     for p in paths:
         json_rpc.notify(ls.DidOpenTextDocument(p))
 
+    # We should receive some diagnostic since there's an error in the program.
+    r = json_rpc.wait_for(ls.JsonRpc.JsonRpcPendingMethod(
+        'textDocument/publishDiagnostics'))
+
+    diags = r['diagnostics']
+
     r = json_rpc.request(ls.GotoDefinition(paths[0], 30, 13))
     r = json_rpc.wait_for(r)
     assert_def(r, '/test.go', 9, 5)
@@ -44,6 +50,15 @@ def interact(json_rpc):
     for lens in r:
         r2 = json_rpc.request(ls.CodeLensResolve(lens))
         r2 = json_rpc.wait_for(r2)
+
+    # Test CodeAction
+    r = json_rpc.request(ls.CodeAction(paths[0], ls.Range(1, 1, 41, 0), diags))
+    r = json_rpc.wait_for(r)
+    assert len(r) == 1
+    assert r[0]['command'] == 'go.import.add'
+    assert r[0]['title'] == 'import "golang.org/x/tools/godoc"'
+    assert len(r[0]['arguments']) == 1
+    assert r[0]['arguments'][0] == 'golang.org/x/tools/godoc'
 
 
 def main():
