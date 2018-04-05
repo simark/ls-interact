@@ -265,6 +265,24 @@ class DidCloseTextDocument(Base):
         obj['textDocument'] = {}
         obj['textDocument']['uri'] = 'file://' + self._path
         return obj
+        
+
+class DidChangeTextDocument(Base):
+
+    def __init__(self, path, text):
+        super().__init__('textDocument/didChange')
+        self._path = path
+        self._text = text
+
+    def get_params(self):
+        obj = {}
+        obj['textDocument'] = {}
+        obj['textDocument']['uri'] = 'file://' + self._path
+        obj['contentChanges'] = [{
+            'text': self._text,
+        }]
+        
+        return obj
 
 
 class GotoDefinition(Base):
@@ -317,7 +335,10 @@ class CodeAction(Base):
     def __init__(self, path, range_, diags):
         super().__init__('textDocument/codeAction')
         self._path = path
-        self._range = range_
+        if type(range_) == Range:
+            self._range = range_.to_lsp()
+        else:
+            self._range = range_
         self._diags = diags
 
     def get_params(self):
@@ -325,7 +346,7 @@ class CodeAction(Base):
 
         obj['textDocument'] = {}
         obj['textDocument']['uri'] = 'file://' + self._path
-        obj['range'] = self._range.to_lsp()
+        obj['range'] = self._range
         obj['context'] = {
             'diagnostics': self._diags,
         }
@@ -355,15 +376,25 @@ class Hover(Base):
 
 class DidChangeConfiguration(Base):
 
-    def __init__(self, new_compile_commands_dir):
+    def __init__(self, params):
         super().__init__('workspace/didChangeConfiguration')
-        self._new_compile_commands_dir = new_compile_commands_dir
+        self._params = params
 
     def get_params(self):
-        obj = {}
-        obj['settings'] = {}
-        obj['settings']['compilationDatabasePath'] = self._new_compile_commands_dir
-        return obj
+        return self._params
+        
+
+class WorkspaceSymbol(Base):
+
+    def __init__(self, query):
+        super().__init__('workspace/symbol')
+        self._query = query
+
+    def get_params(self):
+        return {
+            'query': self._query
+        }
+        
 
 
 def run(callback, initialize_params={}):
