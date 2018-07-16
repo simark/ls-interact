@@ -6,7 +6,7 @@ program: first.o second.o
 	c++ $^ -o $@
 
 %.o: ../src/%.cpp
-	c++ -c $< -o $@ -g3 -O0
+	c++ -c $< -o $@ -g3 -O0 -DBUILD=2
 
 .PHONY: clean
 clean:

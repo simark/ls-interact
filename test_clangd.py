@@ -1,5 +1,5 @@
 #
-# Run with: python3 test_clangd.py "/path/to/clangd --compile-commands-dir ${PWD}/cpp-test/build"
+# Run with: python3 test_clangd.py "/path/to/clangd --compile-commands-dir ${PWD}/cpp-test/build-1"
 #
 
 import ls_interact as ls
@@ -19,7 +19,8 @@ def interact(json_rpc):
         json_rpc.wait_for(ls.JsonRpc.JsonRpcPendingMethod(
             'textDocument/publishDiagnostics'))
 
-    r = json_rpc.request(ls.GotoDefinition(paths[0], 7, 3))
+    # ctrl-click on bob()
+    r = json_rpc.request(ls.GotoDefinition(paths[0], 13, 3))
     r = json_rpc.wait_for(r)
     # Broken for now, we have two results, in:
     # - file:///home/emaisin/src/ls-interact/cpp-test/build/../src/first.h
@@ -27,7 +28,8 @@ def interact(json_rpc):
     #assert len(r) == 1
     assert r[0]['uri'].endswith('/first.h')
 
-    r = json_rpc.request(ls.GotoDefinition(paths[0], 12, 3))
+    # ctrl-click on bar()
+    r = json_rpc.request(ls.GotoDefinition(paths[0], 18, 3))
     r = json_rpc.wait_for(r)
     assert len(r) == 1
     # This doesn't work currently, since there's no cross-cu index.  Instead, it
@@ -35,16 +37,18 @@ def interact(json_rpc):
     # assert r[0]['uri'].endswith('/second.cpp')
     assert r[0]['uri'].endswith('/first.cpp')
 
-    r = json_rpc.request(ls.GotoDefinition(paths[0], 13, 3))
+    # ctrl-click on foo()
+    r = json_rpc.request(ls.GotoDefinition(paths[0], 19, 3))
     r = json_rpc.wait_for(r)
     assert len(r) == 1
     assert r[0]['uri'].endswith('/first.cpp')
 
 
 def main():
-    if not os.path.exists('./cpp-test/build/compile_commands.json'):
-        print('Could not find compile_commands.json, please run make in ./cpp-test/build.')
-        return
+    for build in (1, 2):
+        ret = os.system('make -C cpp-test/build-{}'.format(build))
+        if ret != 0:
+            return ret
 
     ls.run(interact)
 
