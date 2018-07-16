@@ -8,18 +8,12 @@ import sys
 import os
 import select
 import argparse
+import common
 
 from colorama import Fore, Back, Style
 from pygments import highlight
 from pygments.lexers import JsonLexer
 from pygments.formatters import TerminalFormatter
-
-
-def start_langserv(langserv):
-    ''' Start the language server, return a Popen object. '''
-
-    cmd = '{}'.format(langserv)
-    return subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
 
 def print_log(json_bytes, sender, log_pretty):
@@ -407,7 +401,7 @@ def run(callback, initialize_params={}):
                            help='when --log is enabled, pretty-print the json')
     args = argparser.parse_args()
 
-    server = start_langserv(args.server)
+    server = common.start_tool(args.server)
     json_rpc = JsonRpc(server.stdin, server.stdout, args.log, args.log_pretty)
 
     p = json_rpc.request(Initialize(initialize_params))
