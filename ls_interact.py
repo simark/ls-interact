@@ -40,6 +40,16 @@ class Range:
         return self._ec - 1
 
 
+class Initialize(Base):
+
+    def __init__(self, params):
+        super().__init__('initialize')
+        self._params = params
+
+    def get_params(self):
+        return self._params
+
+
 class Initialized(Base):
 
     def __init__(self):
@@ -246,7 +256,7 @@ def run(callback, initialize_params={}):
     json_rpc = common.JsonRpc(server.stdin, server.stdout, args.log,
                               args.log_pretty)
 
-    p = json_rpc.request(common.Initialize(initialize_params))
+    p = json_rpc.request(Initialize(initialize_params))
     json_rpc.wait_for(p)
 
     json_rpc.notify(Initialized())

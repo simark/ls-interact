@@ -64,18 +64,21 @@ class JsonRpc:
         self._log = log
         self._log_pretty = log_pretty
 
+    def encodeRequest(self, the_id, method_name, params):
+        obj = {}
+        obj['jsonrpc'] = '2.0'
+        obj['id'] = the_id
+        obj['method'] = method_name
+        obj['params'] = params
+        return obj
+
     def request(self, req):
         method_name = req.get_method_name()
         params = req.get_params()
 
-        obj = {}
-
-        obj['jsonrpc'] = '2.0'
         the_id = self._next_id
-        obj['id'] = the_id
         self._next_id += 1
-        obj['method'] = method_name
-        obj['params'] = params
+        obj = self.encodeRequest(the_id, method_name, params)
 
         b = json.dumps(obj).encode()
         header = 'Content-Length: {}\r\n\r\n'.format(len(b)).encode()
@@ -150,13 +153,3 @@ class Base:
 
     def get_method_name(self):
         return self._method_name
-
-
-class Initialize(Base):
-
-    def __init__(self, params):
-        super().__init__('initialize')
-        self._params = params
-
-    def get_params(self):
-        return self._params
