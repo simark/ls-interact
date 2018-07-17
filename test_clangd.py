@@ -3,8 +3,7 @@
 #
 
 import ls_interact as ls
-import sys
-import json
+from common import JsonRpc
 import os
 
 
@@ -16,7 +15,7 @@ def interact(json_rpc):
         json_rpc.notify(ls.DidOpenTextDocument(p))
 
     for p in paths:
-        json_rpc.wait_for(ls.JsonRpc.JsonRpcPendingMethod(
+        json_rpc.wait_for(JsonRpc.JsonRpcPendingMethod(
             'textDocument/publishDiagnostics'))
 
     # ctrl-click on bob()
@@ -25,15 +24,15 @@ def interact(json_rpc):
     # Broken for now, we have two results, in:
     # - file:///home/emaisin/src/ls-interact/cpp-test/build/../src/first.h
     # - file:///home/emaisin/src/ls-interact/cpp-test/src/first.h
-    #assert len(r) == 1
+    # assert len(r) == 1
     assert r[0]['uri'].endswith('/first.h')
 
     # ctrl-click on bar()
     r = json_rpc.request(ls.GotoDefinition(paths[0], 18, 3))
     r = json_rpc.wait_for(r)
     assert len(r) == 1
-    # This doesn't work currently, since there's no cross-cu index.  Instead, it
-    # goes to the declaration.
+    # This doesn't work currently, since there's no cross-cu index.  Instead,
+    # it goes to the declaration.
     # assert r[0]['uri'].endswith('/second.cpp')
     assert r[0]['uri'].endswith('/first.cpp')
 
