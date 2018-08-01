@@ -72,6 +72,9 @@ class JsonRpc:
         obj['params'] = params
         return obj
 
+    def pending_id(self, the_id):
+        return JsonRpc.JsonRpcPendingId(the_id)
+
     def request(self, req):
         method_name = req.get_method_name()
         params = req.get_params()
@@ -90,7 +93,7 @@ class JsonRpc:
         self._output.write(b)
         self._output.flush()
 
-        return JsonRpc.JsonRpcPendingId(the_id)
+        return self.pending_id(the_id)
 
     def notify(self, notif):
         method_name = notif.get_method_name()
