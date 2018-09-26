@@ -1,0 +1,61 @@
+V[13:59:51.904] <<< {"id":123,"jsonrpc":"2.0","method":"initialize","params":{}}
+
+I[13:59:51.904] <-- initialize(123)
+I[13:59:51.904] --> reply(123)
+Content-Length: 649
+
+{"id":123,"jsonrpc":"2.0","result":{"capabilities":{"codeActionProvider":true,"completionProvider":{"resolveProvider":false,"triggerCharacters":[".",">",":"]},"definitionProvider":true,"documentFormattingProvider":true,"documentHighlightProvider":true,"documentOnTypeFormattingProvider":{"firstTriggerCharacter":"}","moreTriggerCharacter":[]},"documentRangeFormattingProvider":true,"documentSymbolProvider":true,"executeCommandProvider":{"commands":["clangd.applyFix"]},"hoverProvider":true,"referencesProvider":true,"renameProvider":true,"signatureHelpProvider":{"triggerCharacters":["(",","]},"textDocumentSync":2,"workspaceSymbolProvider":true}}}V[13:59:51.905] >>> {"id":123,"jsonrpc":"2.0","result":{"capabilities":{"codeActionProvider":true,"completionProvider":{"resolveProvider":false,"triggerCharacters":[".",">",":"]},"definitionProvider":true,"documentFormattingProvider":true,"documentHighlightProvider":true,"documentOnTypeFormattingProvider":{"firstTriggerCharacter":"}","moreTriggerCharacter":[]},"documentRangeFormattingProvider":true,"documentSymbolProvider":true,"executeCommandProvider":{"commands":["clangd.applyFix"]},"hoverProvider":true,"referencesProvider":true,"renameProvider":true,"signatureHelpProvider":{"triggerCharacters":["(",","]},"textDocumentSync":2,"workspaceSymbolProvider":true}}}
+
+V[13:59:51.905] <<< {"jsonrpc":"2.0","method":"initialized","params":{}}
+
+I[13:59:51.905] <-- initialized
+E[13:59:51.905] Error -32601: method not found
+V[13:59:51.905] <<< {"jsonrpc":"2.0","method":"textDocument/didOpen","params":{"textDocument":{"languageId":"cpp","text":"#ifndef CORE_CLOCK_H\n#define CORE_CLOCK_H\n#include \"nng_impl.h\"\nextern int foo(void);\n#endif\n","uri":"file:///home/emaisin/src/ls-interact/ifdef-bug-repro/clock.h","version":1}}}
+
+I[13:59:51.905] <-- textDocument/didOpen
+I[13:59:51.905] Failed to find compilation database for /home/emaisin/src/ls-interact/ifdef-bug-repro/clock.h
+I[13:59:51.905] Updating file /home/emaisin/src/ls-interact/ifdef-bug-repro/clock.h with command [/home/emaisin/src/ls-interact/ifdef-bug-repro] clang -xobjective-c++-header /home/emaisin/src/ls-interact/ifdef-bug-repro/clock.h -resource-dir=/home/emaisin/build/llvm/bin/../lib/clang/8.0.0
+V[13:59:51.914] Preamble for file /home/emaisin/src/ls-interact/ifdef-bug-repro/clock.h cannot be reused. Attempting to rebuild it.
+clangd: /home/emaisin/src/llvm/tools/clang/lib/Lex/PPDirectives.cpp:494: void clang::Preprocessor::SkipExcludedConditionalBlock(clang::SourceLocation, clang::SourceLocation, bool, bool, clang::SourceLocation): Assertion `!InCond && "Can't be skipping if not in a conditional!"' failed.
+#0 0x00007fea4a07cf49 llvm::sys::PrintStackTrace(llvm::raw_ostream&) /home/emaisin/src/llvm/lib/Support/Unix/Signals.inc:490:11
+#1 0x00007fea4a07d0f9 PrintStackTraceSignalHandler(void*) /home/emaisin/src/llvm/lib/Support/Unix/Signals.inc:554:1
+#2 0x00007fea4a07b206 llvm::sys::RunSignalHandlers() /home/emaisin/src/llvm/lib/Support/Signals.cpp:66:5
+#3 0x00007fea4a07d727 SignalHandler(int) /home/emaisin/src/llvm/lib/Support/Unix/Signals.inc:353:1
+#4 0x00007fea49b6d390 __restore_rt (/lib/x86_64-linux-gnu/libpthread.so.0+0x11390)
+#5 0x00007fea468dc428 gsignal /build/glibc-Cl5G7W/glibc-2.23/signal/../sysdeps/unix/sysv/linux/raise.c:54:0
+#6 0x00007fea468de02a abort /build/glibc-Cl5G7W/glibc-2.23/stdlib/abort.c:91:0
+#7 0x00007fea468d4bd7 __assert_fail_base /build/glibc-Cl5G7W/glibc-2.23/assert/assert.c:92:0
+#8 0x00007fea468d4c82 (/lib/x86_64-linux-gnu/libc.so.6+0x2dc82)
+#9 0x00007fea44184bd3 clang::Preprocessor::SkipExcludedConditionalBlock(clang::SourceLocation, clang::SourceLocation, bool, bool, clang::SourceLocation) /home/emaisin/src/llvm/tools/clang/lib/Lex/PPDirectives.cpp:497:13
+#10 0x00007fea4418c35f clang::Preprocessor::HandleIfdefDirective(clang::Token&, clang::Token const&, bool, bool) /home/emaisin/src/llvm/tools/clang/lib/Lex/PPDirectives.cpp:0:5
+#11 0x00007fea4418b1f9 clang::Preprocessor::HandleDirective(clang::Token&) /home/emaisin/src/llvm/tools/clang/lib/Lex/PPDirectives.cpp:1008:14
+#12 0x00007fea44100224 clang::Lexer::LexTokenInternal(clang::Token&, bool) /home/emaisin/src/llvm/tools/clang/lib/Lex/Lexer.cpp:3934:7
+#13 0x00007fea440fbf88 clang::Lexer::Lex(clang::Token&) /home/emaisin/src/llvm/tools/clang/lib/Lex/Lexer.cpp:3153:8
+#14 0x00007fea4421c0ab clang::Preprocessor::Lex(clang::Token&) /home/emaisin/src/llvm/tools/clang/lib/Lex/Preprocessor.cpp:878:21
+#15 0x00007fea434f87e6 clang::Parser::ConsumeToken() /home/emaisin/src/llvm/tools/clang/include/clang/Parse/Parser.h:416:12
+#16 0x00007fea43617d8d clang::Parser::Initialize() /home/emaisin/src/llvm/tools/clang/lib/Parse/Parser.cpp:519:3
+#17 0x00007fea434f0834 clang::ParseAST(clang::Sema&, bool, bool) /home/emaisin/src/llvm/tools/clang/lib/Parse/ParseAST.cpp:154:7
+#18 0x00007fea48e53382 clang::ASTFrontendAction::ExecuteAction() /home/emaisin/src/llvm/tools/clang/lib/Frontend/FrontendAction.cpp:1018:1
+#19 0x00007fea48e52dc0 clang::FrontendAction::Execute() /home/emaisin/src/llvm/tools/clang/lib/Frontend/FrontendAction.cpp:919:7
+#20 0x00007fea48ead139 clang::PrecompiledPreamble::Build(clang::CompilerInvocation const&, llvm::MemoryBuffer const*, clang::PreambleBounds, clang::DiagnosticsEngine&, llvm::IntrusiveRefCntPtr<clang::vfs::FileSystem>, std::shared_ptr<clang::PCHContainerOperations>, bool, clang::PreambleCallbacks&) /home/emaisin/src/llvm/tools/clang/lib/Frontend/PrecompiledPreamble.cpp:353:3
+#21 0x00007fea491ae0e2 clang::clangd::buildPreamble(llvm::StringRef, clang::CompilerInvocation&, std::shared_ptr<clang::clangd::PreambleData const>, clang::tooling::CompileCommand const&, clang::clangd::ParseInputs const&, std::shared_ptr<clang::PCHContainerOperations>, bool, std::function<void (clang::ASTContext&, std::shared_ptr<clang::Preprocessor>)>) /home/emaisin/src/llvm/tools/clang/tools/extra/clangd/ClangdUnit.cpp:337:24
+#22 0x00007fea492d2a2d clang::clangd::(anonymous namespace)::ASTWorker::update(clang::clangd::ParseInputs, clang::clangd::WantDiagnostics, llvm::unique_function<void (std::vector<clang::clangd::Diag, std::allocator<clang::clangd::Diag> >)>)::$_0::operator()(llvm::unique_function<void (std::vector<clang::clangd::Diag, std::allocator<clang::clangd::Diag> >)>) /home/emaisin/src/llvm/tools/clang/tools/extra/clangd/TUScheduler.cpp:368:55
+#23 0x00007fea492d25f7 _ZN5clang6clangd13ForwardBinderIZNS0_12_GLOBAL__N_19ASTWorker6updateENS0_11ParseInputsENS0_15WantDiagnosticsEN4llvm15unique_functionIFvSt6vectorINS0_4DiagESaIS9_EEEEEE3$_0JSD_EE8CallImplIJLm0EEJEEEDTclclL_ZSt3getILm0EJSE_SD_EERNSt13tuple_elementIXT_ESt5tupleIJDpT0_EEE4typeERSM_EptfpT17FuncWithArgumentsEspclsr3stdE7forwardI_SUBSTPACK_Eclsr3stdE3getIXplT_Li1EEEptfpT17FuncWithArgumentsEEspclsr3stdE7forwardISK_Efp0_EEENS6_16integer_sequenceImJXspT_EEEEDpOSK_ /home/emaisin/src/llvm/tools/clang/tools/extra/clangd/Function.h:54:5
+#24 0x00007fea492d25a8 _ZN5clang6clangd13ForwardBinderIZNS0_12_GLOBAL__N_19ASTWorker6updateENS0_11ParseInputsENS0_15WantDiagnosticsEN4llvm15unique_functionIFvSt6vectorINS0_4DiagESaIS9_EEEEEE3$_0JSD_EEclIJEEEDTclptfpT8CallImplcvNS6_18index_sequence_forIJSD_EEE_Espclsr3stdE7forwardIT_Efp_EEEDpOSJ_ /home/emaisin/src/llvm/tools/clang/tools/extra/clangd/Function.h:69:5
+#25 0x00007fea492d2495 void llvm::unique_function<void ()>::CallImpl<clang::clangd::ForwardBinder<clang::clangd::(anonymous namespace)::ASTWorker::update(clang::clangd::ParseInputs, clang::clangd::WantDiagnostics, llvm::unique_function<void (std::vector<clang::clangd::Diag, std::allocator<clang::clangd::Diag> >)>)::$_0, llvm::unique_function<void (std::vector<clang::clangd::Diag, std::allocator<clang::clangd::Diag> >)> > >(void*) /home/emaisin/src/llvm/include/llvm/ADT/FunctionExtras.h:158:5
+#26 0x00007fea4922730f llvm::unique_function<void ()>::operator()() /home/emaisin/src/llvm/include/llvm/ADT/FunctionExtras.h:281:5
+#27 0x00007fea492d072f clang::clangd::(anonymous namespace)::ASTWorker::run() /home/emaisin/src/llvm/tools/clang/tools/extra/clangd/TUScheduler.cpp:582:5
+#28 0x00007fea492d020d clang::clangd::(anonymous namespace)::ASTWorker::create(llvm::StringRef, clang::clangd::TUScheduler::ASTCache&, clang::clangd::AsyncTaskRunner*, clang::clangd::Semaphore&, std::chrono::duration<long, std::ratio<1l, 1000000000l> >, std::shared_ptr<clang::PCHContainerOperations>, bool, clang::clangd::ParsingCallbacks&)::$_5::operator()() const /home/emaisin/src/llvm/tools/clang/tools/extra/clangd/TUScheduler.cpp:311:49
+#29 0x00007fea492d0155 void llvm::unique_function<void ()>::CallImpl<clang::clangd::(anonymous namespace)::ASTWorker::create(llvm::StringRef, clang::clangd::TUScheduler::ASTCache&, clang::clangd::AsyncTaskRunner*, clang::clangd::Semaphore&, std::chrono::duration<long, std::ratio<1l, 1000000000l> >, std::shared_ptr<clang::PCHContainerOperations>, bool, clang::clangd::ParsingCallbacks&)::$_5>(void*) /home/emaisin/src/llvm/include/llvm/ADT/FunctionExtras.h:158:5
+#30 0x00007fea4922730f llvm::unique_function<void ()>::operator()() /home/emaisin/src/llvm/include/llvm/ADT/FunctionExtras.h:281:5
+#31 0x00007fea492c3cbf clang::clangd::AsyncTaskRunner::runAsync(llvm::Twine const&, llvm::unique_function<void ()>)::$_4::operator()(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, llvm::unique_function<void ()>, llvm::detail::scope_exit<clang::clangd::AsyncTaskRunner::runAsync(llvm::Twine const&, llvm::unique_function<void ()>)::$_0>) const /home/emaisin/src/llvm/tools/clang/tools/extra/clangd/Threading.cpp:73:9
+#32 0x00007fea492c3c41 void std::_Bind_simple<clang::clangd::AsyncTaskRunner::runAsync(llvm::Twine const&, llvm::unique_function<void ()>)::$_4 (std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, llvm::unique_function<void ()>, llvm::detail::scope_exit<clang::clangd::AsyncTaskRunner::runAsync(llvm::Twine const&, llvm::unique_function<void ()>)::$_0>)>::_M_invoke<0ul, 1ul, 2ul>(std::_Index_tuple<0ul, 1ul, 2ul>) /usr/bin/../lib/gcc/x86_64-linux-gnu/5.4.0/../../../../include/c++/5.4.0/functional:1530:11
+#33 0x00007fea492c3ba5 std::_Bind_simple<clang::clangd::AsyncTaskRunner::runAsync(llvm::Twine const&, llvm::unique_function<void ()>)::$_4 (std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, llvm::unique_function<void ()>, llvm::detail::scope_exit<clang::clangd::AsyncTaskRunner::runAsync(llvm::Twine const&, llvm::unique_function<void ()>)::$_0>)>::operator()() /usr/bin/../lib/gcc/x86_64-linux-gnu/5.4.0/../../../../include/c++/5.4.0/functional:1520:9
+#34 0x00007fea492c3719 std::thread::_Impl<std::_Bind_simple<clang::clangd::AsyncTaskRunner::runAsync(llvm::Twine const&, llvm::unique_function<void ()>)::$_4 (std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, llvm::unique_function<void ()>, llvm::detail::scope_exit<clang::crepro.sh: line 7: 24434 Aborted                 clangd -log=verbose -input-style=delimited  <<HERE
+{"params": {}, "jsonrpc": "2.0", "method": "initialize", "id": 123}
+---
+{"params": {}, "jsonrpc": "2.0", "method": "initialized"}
+---
+{"params": {"textDocument": {"text": "#ifndef CORE_CLOCK_H\\n#define CORE_CLOCK_H\\n#include \\"nng_impl.h\\"\\nextern int foo(void);\\n#endif\\n", "version": 1, "uri": "file://`pwd`/clock.h", "languageId": "cpp"}}, "jsonrpc": "2.0", "method": "textDocument/didOpen"}
+HERE
+
