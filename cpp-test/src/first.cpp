@@ -1,4 +1,5 @@
 #include "first.h"
+#include "second.h"
 
 #if BUILD == 1
 #warning "This is build 1"
@@ -6,9 +7,8 @@
 #warning "This is build 2"
 #endif
 
-void bar();
 
-void foo()
+static void foo()
 {
   bob();
 }

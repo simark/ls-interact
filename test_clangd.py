@@ -34,7 +34,7 @@ def interact(json_rpc):
     # This doesn't work currently, since there's no cross-cu index.  Instead,
     # it goes to the declaration.
     # assert r[0]['uri'].endswith('/second.cpp')
-    assert r[0]['uri'].endswith('/first.cpp')
+    assert r[0]['uri'].endswith('/second.h')
 
     # ctrl-click on foo()
     r = json_rpc.request(ls.GotoDefinition(paths[0], 19, 3))
