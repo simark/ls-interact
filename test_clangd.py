@@ -21,10 +21,7 @@ def interact(json_rpc):
     # ctrl-click on bob()
     r = json_rpc.request(ls.GotoDefinition(paths[0], 13, 3))
     r = json_rpc.wait_for(r)
-    # Broken for now, we have two results, in:
-    # - file:///home/emaisin/src/ls-interact/cpp-test/build/../src/first.h
-    # - file:///home/emaisin/src/ls-interact/cpp-test/src/first.h
-    # assert len(r) == 1
+    assert len(r) == 1
     assert r[0]['uri'].endswith('/first.h')
 
     # ctrl-click on bar()
