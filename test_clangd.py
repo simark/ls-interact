@@ -1,5 +1,5 @@
 #
-# Run with: python3 test_clangd.py "/path/to/clangd --compile-commands-dir ${PWD}/cpp-test/build-1"
+# Run with: python3 test_clangd.py --log --log-pretty "/path/to/clangd --compile-commands-dir ${PWD}/cpp-test/build-1"
 #
 
 import ls_interact as ls
