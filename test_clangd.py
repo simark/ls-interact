@@ -46,7 +46,9 @@ def main():
         if ret != 0:
             return ret
 
-    ls.run(interact)
+    ls.run(interact, {
+        'rootUri': 'file://' + os.getcwd() + '/cpp-test/src',
+    })
 
 
 if __name__ == '__main__':
