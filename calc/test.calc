@@ -1,0 +1,2 @@
+let foo(a) : a * a
+foo(21)

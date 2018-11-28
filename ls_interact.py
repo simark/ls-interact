@@ -1,5 +1,6 @@
 import argparse
 import common
+import re
 from common import Base
 
 
@@ -252,9 +253,16 @@ def run(callback, initialize_params={}):
                            help='when --log is enabled, pretty-print the json')
     args = argparser.parse_args()
 
-    server = common.start_tool(args.server)
-    json_rpc = common.JsonRpc(server.stdin, server.stdout, args.log,
-                              args.log_pretty)
+    m = re.match(r':(\d{1,5})', args.server)
+    if m:
+        port = int(m.group(1))
+        sock = common.connect_tool(port)
+        json_rpc = common.JsonRpc(sock, sock, args.log,
+                                  args.log_pretty)
+    else:
+        server = common.start_tool(args.server)
+        json_rpc = common.JsonRpc(server.stdin, server.stdout, args.log,
+                                  args.log_pretty)
 
     p = json_rpc.request(Initialize(initialize_params))
     json_rpc.wait_for(p)

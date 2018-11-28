@@ -1,5 +1,6 @@
 import subprocess
 import json
+import socket
 
 from colorama import Fore, Back, Style
 from pygments import highlight
@@ -35,13 +36,20 @@ def start_tool(langserv):
                             stdout=subprocess.PIPE)
 
 
+def connect_tool(port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(('127.0.0.1', port))
+    return s.makefile(mode='rwb')
+
+
 class JsonRpc:
     class JsonRpcPendingId:
         def __init__(self, the_id):
             self._id = the_id
 
         def matches(self, json_data):
-            return 'id' in json_data and json_data['id'] == self._id
+            return ('id' in json_data
+                    and str(json_data['id']) == str(self._id))
 
         def extract(self, json_data):
             return json_data['result']
