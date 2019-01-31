@@ -151,6 +151,26 @@ class GotoDefinition(Base):
         return obj
 
 
+class FindReferences(Base):
+
+    def __init__(self, path, line, col):
+        super().__init__('textDocument/references')
+        self._path = path
+        self._line = line
+        self._col = col
+
+    def get_params(self):
+        obj = {}
+
+        obj['textDocument'] = {}
+        obj['textDocument']['uri'] = 'file://' + self._path
+        obj['position'] = {}
+        obj['position']['line'] = self._line - 1
+        obj['position']['character'] = self._col - 1
+
+        return obj
+
+
 class CodeLens(Base):
 
     def __init__(self, path):
@@ -242,7 +262,7 @@ class WorkspaceSymbol(Base):
         }
 
 
-def run(callback, initialize_params={}):
+def run(callback, cmdline_args="", initialize_params={}):
     argparser = argparse.ArgumentParser()
     argparser.add_argument('server',
                            help=('server executable (may contain additional ' +
@@ -260,7 +280,7 @@ def run(callback, initialize_params={}):
         json_rpc = common.JsonRpc(sock, sock, args.log,
                                   args.log_pretty)
     else:
-        server = common.start_tool(args.server)
+        server = common.start_tool('{} {}'.format(args.server, cmdline_args))
         json_rpc = common.JsonRpc(server.stdin, server.stdout, args.log,
                                   args.log_pretty)
 

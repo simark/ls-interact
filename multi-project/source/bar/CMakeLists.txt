@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.5)
+project (bar)
+add_executable(bar bar.cpp)
+target_include_directories(bar PRIVATE ../libfoo)
+target_link_libraries(bar ${CMAKE_BINARY_DIR}/../libfoo/libfoo.a)
